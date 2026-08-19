@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # HEAT Mobility Assessment - Cloud Run Deployment Script
-# Deploys the backend API to Google Cloud Run
+# Deploys the backend API to Google Cloud Run using --source . (same
+# pattern as the wellness questionnaire's working deploy.sh).
 
 set -e
 
-# Configuration - UPDATE THESE VALUES
+# Configuration - UPDATE DB_CONNECTION_NAME to your Cloud SQL instance
 PROJECT_ID="norse-coral-441421-r9"
 REGION="us-east4"
 SERVICE_NAME="heat-mobility-api"
