@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HEAT Mobility Assessment</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #111521 0%, #1a1f3a 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #ffffff;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(252, 186, 57, 0.1);
+    }
+
+    .header { text-align: center; margin-bottom: 30px; }
+    .logo { width: 160px; height: 160px; margin: 0 auto; }
+    .logo img { width: 100%; height: 100%; object-fit: contain; }
+    h1 { color: #fcba39; font-size: 26px; margin-bottom: 6px; font-weight: 700; }
+    .subtitle { color: rgba(255, 255, 255, 0.7); font-size: 15px; margin-bottom: 20px; }
+
+    fieldset {
+        border: 1px solid rgba(252, 186, 57, 0.25);
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+    }
+    legend { color: #fcba39; font-weight: 700; padding: 0 8px; font-size: 16px; }
+
+    .group-desc {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 13.5px;
+        line-height: 1.5;
+        margin-bottom: 14px;
+    }
+
+    /* Video is centered, and its associated test block(s) sit directly under it */
+    .video-block { margin-bottom: 20px; text-align: center; }
+    .video-label { color: #fcba39; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+    .video-block iframe {
+        width: 100%;
+        max-width: 480px;
+        height: 270px;
+        border-radius: 8px;
+        border: 1px solid rgba(252, 186, 57, 0.2);
+        display: block;
+        margin: 0 auto;
+    }
+
+    .test-block {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 14px 0;
+        text-align: left;
+    }
+    .test-block:first-child { border-top: none; padding-top: 4px; }
+    .test-name { font-weight: 700; font-size: 14.5px; margin-bottom: 6px; }
+    .test-desc {
+        color: rgba(255, 255, 255, 0.65);
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin-bottom: 8px;
+    }
+
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 14px;
+        margin-bottom: 10px;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 6px;
+        font-size: 11.5px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; color: rgba(255,255,255,0.75); }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 9px; }
+    .legend-dot.bad { background: #f44336; }
+    .legend-dot.average { background: #f5a623; }
+    .legend-dot.good { background: #8bc34a; }
+    .legend-dot.elite { background: #4CAF50; }
+
+    .error-list {
+        list-style: none;
+        margin: 0 0 10px 0;
+        padding: 10px 12px;
+        background: rgba(252, 186, 57, 0.06);
+        border: 1px solid rgba(252, 186, 57, 0.15);
+        border-radius: 6px;
+    }
+    .error-list li {
+        font-size: 12.5px;
+        color: rgba(255, 255, 255, 0.8);
+        padding: 3px 0;
+    }
+    .error-list li::before { content: "\2022  "; color: #fcba39; }
+
+    .lr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .single-grid { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 260px; }
+    .side { display: flex; align-items: center; gap: 8px; }
+    .side label { font-weight: 600; font-size: 13px; flex: 0 0 18px; }
+    .side input { flex: 1 1 auto; min-width: 0; }
+
+    .field-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .field-row label { flex: 0 0 160px; font-weight: 600; font-size: 14px; }
+
+    input[type="text"], input[type="number"], input[type="date"], select {
+        padding: 10px;
+        border: 2px solid rgba(252, 186, 57, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-size: 14px;
+    }
+    .top-section input, .top-section select { flex: 0 0 220px; }
+    input:focus, select:focus {
+        outline: none;
+        border-color: #fcba39;
+        background: rgba(255, 255, 255, 0.12);
+    }
+    option { background: #111521; color: #ffffff; }
+    .unit { color: rgba(255,255,255,0.5); font-size: 12px; }
+
+    /* Athlete typeahead */
+    .athlete-search-wrap { position: relative; flex: 0 0 220px; }
+    .athlete-search-wrap input { width: 100%; }
+    .athlete-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        max-height: 240px;
+        overflow-y: auto;
+        background: #1a1f3a;
+        border: 2px solid rgba(252, 186, 57, 0.3);
+        border-radius: 8px;
+        z-index: 20;
+        display: none;
+    }
+    .athlete-dropdown.open { display: block; }
+    .athlete-option { padding: 9px 12px; font-size: 13.5px; cursor: pointer; }
+    .athlete-option:hover, .athlete-option.active { background: rgba(252, 186, 57, 0.15); }
+    .athlete-option.add-new { color: #fcba39; font-weight: 600; border-top: 1px solid rgba(252, 186, 57, 0.2); }
+    .athlete-option.no-match { color: rgba(255,255,255,0.5); cursor: default; }
+
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #fcba39 0%, #f5a623 100%);
+        color: #111521;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 10px;
+    }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    #status { margin-top: 14px; font-weight: 600; text-align: center; }
+    #status.success { color: #4CAF50; }
+    #status.error { color: #f44336; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="logo"><img src="RBI_HEAT_Logo.svg" alt="RBI HEAT"></div>
+    <h1>HEAT Mobility Assessment</h1>
+    <p class="subtitle">Complete the screen below to generate a mobility program</p>
+  </div>
+
+  <form id="assessment-form">
+    <div class="top-section">
+      <fieldset>
+        <legend>Assessment Info</legend>
+        <div class="field-row">
+          <label for="assessment_type">Assessment Type</label>
+          <select id="assessment_type" name="assessment_type" required>
+            <option value="Initial Assessment">Initial Assessment</option>
+            <option value="Retest">Retest</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label for="level_of_play">Level of Play</label>
+          <select id="level_of_play" name="level_of_play" required>
+            <option value="HS JV">HS JV</option>
+            <option value="HS Varsity">HS Varsity</option>
+            <option value="College">College</option>
+            <option value="Pro">Pro</option>
+          </select>
+        </div>
+
+        <div class="field-row">
+          <label for="athlete_search">Athlete</label>
+          <div class="athlete-search-wrap">
+            <input type="text" id="athlete_search" autocomplete="off"
+                   placeholder="Type to search or add new...">
+            <div id="athlete_dropdown" class="athlete-dropdown"></div>
+          </div>
+          <input type="hidden" id="existing_athlete_id" name="existing_athlete_id">
+          <input type="hidden" id="athlete_name" name="athlete_name">
+        </div>
+
+        <div id="dob-field" style="display:none;">
+          <div class="field-row">
+            <label for="date_of_birth">Date of Birth</label>
+            <input type="date" id="date_of_birth" name="date_of_birth">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label for="height_in">Height</label>
+          <input type="number" step="0.1" id="height_in" name="height_in" required>
+          <span class="unit">inches</span>
+        </div>
+        <div class="field-row">
+          <label for="weight_lb">Weight</label>
+          <input type="number" step="0.1" id="weight_lb" name="weight_lb" required>
+          <span class="unit">lbs</span>
+        </div>
+      </fieldset>
+    </div>
+
+    <div id="joint-fields"><!-- populated from /api/field-groups + /api/field-help + /api/test-reference --></div>
+
+    <button type="submit" id="submit-btn" class="submit-btn">Submit &amp; Generate Program</button>
+    <div id="status"></div>
+  </form>
+</div>
+
+<script>
+// UPDATE after deploying the backend to Cloud Run:
+const API_URL = 'http://localhost:8080/api';
+
+const jointFieldsContainer = document.getElementById('joint-fields');
+const dobField = document.getElementById('dob-field');
+const dobInput = document.getElementById('date_of_birth');
+const existingAthleteIdInput = document.getElementById('existing_athlete_id');
+const athleteNameHidden = document.getElementById('athlete_name');
+
+const athleteSearchInput = document.getElementById('athlete_search');
+const athleteDropdown = document.getElementById('athlete_dropdown');
+
+let athletes = [];
+let athletesLoaded = false;
+
+function categoryClass(cat) {
+  return (cat || '').toLowerCase();
+}
+
+function buildTestBlock(base, label, paired, unit, leftCol, rightCol, testHelp, refData) {
+  const block = document.createElement('div');
+  block.className = 'test-block';
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'test-name';
+  nameEl.textContent = label;
+  block.appendChild(nameEl);
+
+  const th = testHelp[base] || {};
+  if (th.description) {
+    const d = document.createElement('p');
+    d.className = 'test-desc';
+    d.textContent = th.description;
+    block.appendChild(d);
+  }
+
+  // Legend: Bad/Average/Good/Elite reference bands, live from the DB
+  const bands = refData[base];
+  if (bands && bands.length) {
+    const legend = document.createElement('div');
+    legend.className = 'legend';
+    bands.forEach(b => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      const dot = document.createElement('span');
+      dot.className = 'legend-dot ' + categoryClass(b.category);
+      item.appendChild(dot);
+      const text = document.createElement('span');
+      const range = (b.min === b.max) ? `${b.min}` : `${b.min}\u2013${b.max}`;
+      text.textContent = `${b.category}: ${range} ${unit === 'errors' ? '' : unit}`.trim();
+      item.appendChild(text);
+      legend.appendChild(item);
+    });
+    block.appendChild(legend);
+  }
+
+  if (th.errors && th.errors.length) {
+    const ul = document.createElement('ul');
+    ul.className = 'error-list';
+    th.errors.forEach(e => {
+      const li = document.createElement('li');
+      li.textContent = e;
+      ul.appendChild(li);
+    });
+    block.appendChild(ul);
+  }
+
+  const grid = document.createElement('div');
+  if (paired) {
+    grid.className = 'lr-grid';
+    grid.innerHTML = `
+      <div class="side">
+        <label for="${leftCol}">L</label>
+        <input type="number" step="0.1" id="${leftCol}" name="${leftCol}">
+        <span class="unit">${unit}</span>
+      </div>
+      <div class="side">
+        <label for="${rightCol}">R</label>
+        <input type="number" step="0.1" id="${rightCol}" name="${rightCol}">
+        <span class="unit">${unit}</span>
+      </div>`;
+  } else {
+    grid.className = 'single-grid';
+    grid.innerHTML = `
+      <div class="side">
+        <input type="number" step="0.1" id="${leftCol}" name="${leftCol}">
+        <span class="unit">${unit}</span>
+      </div>`;
+  }
+  block.appendChild(grid);
+
+  return block;
+}
+
+// --- Build the joint/test fields: video -> its test(s) -> next video ... ---
+// Field arrays from the backend are already fully resolved:
+//   paired: [base, label, true, unit, leftCol, rightCol]
+//   single: [base, label, false, unit, col]
+Promise.all([
+  fetch(`${API_URL}/field-groups`).then(r => r.json()),
+  fetch(`${API_URL}/field-help`).then(r => r.json()),
+  fetch(`${API_URL}/test-reference`).then(r => r.json()),
+]).then(([groups, help, refData]) => {
+  groups.forEach(([groupLabel, fields]) => {
+    const groupHelp = help[groupLabel] || {};
+    const testHelp = groupHelp.tests || {};
+    const fieldByBase = Object.fromEntries(fields.map(f => [f[0], f]));
+
+    const fieldset = document.createElement('fieldset');
+    const legend = document.createElement('legend');
+    legend.textContent = groupLabel;
+    fieldset.appendChild(legend);
+
+    if (groupHelp.description) {
+      const desc = document.createElement('p');
+      desc.className = 'group-desc';
+      desc.textContent = groupHelp.description;
+      fieldset.appendChild(desc);
+    }
+
+    const rendered = new Set();
+    const videos = groupHelp.videos || [];
+
+    // Video -> its associated test block(s), in sequence
+    videos.forEach(v => {
+      const videoBlock = document.createElement('div');
+      videoBlock.className = 'video-block';
+
+      const label = document.createElement('div');
+      label.className = 'video-label';
+      label.textContent = 'How To: ' + v.label;
+      videoBlock.appendChild(label);
+
+      const iframe = document.createElement('iframe');
+      iframe.src = v.url;
+      iframe.allowFullscreen = true;
+      iframe.loading = 'lazy';
+      videoBlock.appendChild(iframe);
+
+      if (v.image) {
+        const img = document.createElement('img');
+        img.src = v.image;
+        img.alt = v.label + ' reference diagram';
+        img.style.maxWidth = '100%';
+        img.style.marginTop = '12px';
+        img.style.borderRadius = '8px';
+        img.style.border = '1px solid rgba(252, 186, 57, 0.2)';
+        videoBlock.appendChild(img);
+      }
+
+      fieldset.appendChild(videoBlock);
+
+      (v.fields || []).forEach(base => {
+        const f = fieldByBase[base];
+        if (!f) return;
+        const [fBase, fLabel, fPaired, fUnit, colA, colB] = f;
+        fieldset.appendChild(buildTestBlock(fBase, fLabel, fPaired, fUnit, colA, colB, testHelp, refData));
+        rendered.add(base);
+      });
+    });
+
+    // Any fields with no dedicated video render at the end, in original order
+    fields.forEach(f => {
+      const [base, label, paired, unit, colA, colB] = f;
+      if (rendered.has(base)) return;
+      fieldset.appendChild(buildTestBlock(base, label, paired, unit, colA, colB, testHelp, refData));
+    });
+
+    jointFieldsContainer.appendChild(fieldset);
+  });
+}).catch(() => {
+  jointFieldsContainer.innerHTML = '<p style="color:#f44336;">Failed to load assessment fields. Check API_URL.</p>';
+});
+
+// --- Athlete typeahead ---
+function loadAthletes() {
+  fetch(`${API_URL}/athletes`)
+    .then(r => r.json())
+    .then(data => {
+      athletes = data;
+      athletesLoaded = true;
+    })
+    .catch(() => {
+      athleteDropdown.innerHTML = '<div class="athlete-option no-match">Failed to load athletes</div>';
+      athleteDropdown.classList.add('open');
+    });
+}
+loadAthletes();
+
+function renderAthleteDropdown(query) {
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? athletes.filter(a => a.name.toLowerCase().includes(q)).slice(0, 15)
+    : athletes.slice(0, 15);
+
+  athleteDropdown.innerHTML = '';
+
+  if (!athletesLoaded) {
+    const opt = document.createElement('div');
+    opt.className = 'athlete-option no-match';
+    opt.textContent = 'Loading athletes...';
+    athleteDropdown.appendChild(opt);
+  } else if (matches.length === 0 && q) {
+    const opt = document.createElement('div');
+    opt.className = 'athlete-option no-match';
+    opt.textContent = `No matches for "${query}"`;
+    athleteDropdown.appendChild(opt);
+  } else {
+    matches.forEach(a => {
+      const opt = document.createElement('div');
+      opt.className = 'athlete-option';
+      opt.textContent = a.name;
+      opt.addEventListener('click', () => selectAthlete(a));
+      athleteDropdown.appendChild(opt);
+    });
+  }
+
+  const addNew = document.createElement('div');
+  addNew.className = 'athlete-option add-new';
+  addNew.textContent = q ? `+ Add new athlete: "${query}"` : '+ Add new athlete';
+  addNew.addEventListener('click', () => selectNewAthlete(query));
+  athleteDropdown.appendChild(addNew);
+
+  athleteDropdown.classList.add('open');
+}
+
+function selectAthlete(athlete) {
+  athleteSearchInput.value = athlete.name;
+  existingAthleteIdInput.value = athlete.id;
+  athleteNameHidden.value = '';
+  athleteDropdown.classList.remove('open');
+
+  const hasDob = !!athlete.date_of_birth;
+  dobField.style.display = hasDob ? 'none' : '';
+  dobInput.required = !hasDob;
+
+  if (athlete.current_level_of_play) {
+    document.getElementById('level_of_play').value = athlete.current_level_of_play;
+  }
+}
+
+function selectNewAthlete(typedName) {
+  athleteSearchInput.value = typedName;
+  existingAthleteIdInput.value = '__new__';
+  athleteNameHidden.value = typedName;
+  athleteDropdown.classList.remove('open');
+
+  dobField.style.display = '';
+  dobInput.required = true;
+}
+
+athleteSearchInput.addEventListener('input', () => {
+  existingAthleteIdInput.value = '';
+  athleteNameHidden.value = '';
+  renderAthleteDropdown(athleteSearchInput.value);
+});
+athleteSearchInput.addEventListener('focus', () => renderAthleteDropdown(athleteSearchInput.value));
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.athlete-search-wrap')) {
+    athleteDropdown.classList.remove('open');
+  }
+});
+
+// --- Submit ---
+document.getElementById('assessment-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const statusEl = document.getElementById('status');
+  const submitBtn = document.getElementById('submit-btn');
+
+  if (!existingAthleteIdInput.value) {
+    statusEl.className = 'error';
+    statusEl.textContent = 'Select an athlete from the dropdown, or choose "+ Add new athlete".';
+    return;
+  }
+
+  statusEl.className = '';
+  statusEl.textContent = 'Generating program...';
+  submitBtn.disabled = true;
+
+  const formData = new FormData(e.target);
+
+  fetch(`${API_URL}/submit`, { method: 'POST', body: formData })
+    .then(async response => {
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || 'Submission failed');
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mobility_program.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      statusEl.className = 'success';
+      statusEl.textContent = 'Program generated and downloaded.';
+      submitBtn.disabled = false;
+    })
+    .catch(err => {
+      statusEl.className = 'error';
+      statusEl.textContent = 'Error: ' + err.message;
+      submitBtn.disabled = false;
+    });
+});
+</script>
+
+</body>
+</html>
