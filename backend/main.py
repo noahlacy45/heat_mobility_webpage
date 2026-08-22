@@ -231,6 +231,15 @@ def submit_assessment():
                 (player_id, level_of_play, date.today()),
             )
 
+        # --- Keep player_directory's height/weight as a "most recent" cache ---
+        # mobility_assessments.height_in/weight_lb (inserted below) stays the
+        # full per-visit history; these existing player_directory columns are
+        # just a convenience snapshot, overwritten every submission.
+        cur.execute(
+            "UPDATE player_directory SET height = %s, weight = %s WHERE Player_Id = %s",
+            (height_in, weight_lb, player_id),
+        )
+
         # --- Collect the raw joint/test values from the form ---
         assessment_row = {}
         for col in field_defs.assessment_columns():
