@@ -206,10 +206,9 @@ def select_drills_for_program(blocks, cur):
     Avoids repeating the same drill NAME anywhere else in the program.
     """
     cur.execute("""
-        SELECT d.id, d.drill_name, d.video_link, m.group_id, m.default_sets, m.default_reps, m.notes
-        FROM drills d
-        JOIN mobility_drill_defaults m ON m.drill_id = d.id
-        WHERE d.active = TRUE
+        SELECT dl.drill_id, dl.drill, dl.video_link, m.group_id, m.default_sets, m.default_reps, m.notes
+        FROM drill_library dl
+        JOIN mobility_drill_defaults m ON m.drill_id = dl.drill_id
     """)
     all_drills = cur.fetchall()
 
